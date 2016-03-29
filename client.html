@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Distributed Systems Project</title>
+        <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { width:100%; height:100%;}
+        body, input { font-family: 'Lucida Console', 'Lucida Sans Typewriter', monaco, 'Bitstream Vera Sans Mono', monospace; font-size: 16px; width: 100%; height: 100%; padding: 8px; background: black;}
+        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; height: 50px;}
+        form input { background: black; border: 0; padding: 10px; width: 90%; margin-right: .5%; color: #00ff00;}
+        form input:focus { outline: none; }
+        .term { position: absolute; top: 8px; left: 8px; right: 8px; bottom: 50px; float: left; padding: 6px; color: #00ff00; overflow-y: scroll;}
+        </style>
+    </head>
+    <body>
+        <div class="term" id="client"></div>
+        <form>
+            <input id="m" type="text" autocomplete="off"/>
+        </form>
+    </body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script>
+        $(function(){
+            function startClientSocket(id){
+                var socket = io('/client/' + id);
+                socket.on("client", function(data){
+                    $("#client").append(data.replace(/\n/g, '<br/>'));
+                    $('#client').scrollTop($('#client')[0].scrollHeight);
+                });
+                socket.on("leave", function(){
+                    window.open('','_self').close();
+                })
+                $('form').submit(function(event){
+                    socket.emit('input', $('#m').val());
+                    $('#m').val('');
+                    return false;
+                });
+            }
+
+            var location = window.location.pathname;
+            var regex = /client\/(\S+)/;
+            if(regex.test(location)){
+                var id = regex.exec(location)[1];
+                startClientSocket(id);
+
+                $("#m").focus();
+            }
+            $("#m").blur(function() {
+                setTimeout(function() { $("#m").focus(); }, 0);
+            });
+        });
+    </script>
+</html>
