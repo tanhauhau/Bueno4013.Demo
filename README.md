@@ -2,7 +2,7 @@
 
 This web application is written as a [project](https://github.com/tanhauhau/Bueno4013/tree/master) demo.
 
-[Demo](http://lihautan.me/demo/distributed)
+[Demo](http://lihautan.me/demo/distributed/start)
 
 ## Installation
 
