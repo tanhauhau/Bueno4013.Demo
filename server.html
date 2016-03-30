@@ -4,6 +4,8 @@
         <title>Distributed Systems Project - Server</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/icon.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/list.min.css"/>
         <link rel="stylesheet" href="/static/range.css" />
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,7 +22,7 @@
         <div id="add-client">
             Client
         </div>
-        <div class="ui modal">
+        <div class="ui modal" id="startModal">
             <div class="header">
                 Start Server
             </div>
@@ -60,6 +62,39 @@
                 </div>
             </div>
         </div>
+        <div class="ui basic modal" id="infoModal">
+            <div class="image content">
+                <div class="image">
+                    <i class="cloud icon"></i>
+                </div>
+                <div class="description">
+                    <h3 class="header">
+                        Files available in the server
+                    </h3>
+                    <div class="ui list">
+                        <div class="item">
+                            <i class="file outline icon"></i>
+                            <div class="content">
+                                a.txt
+                            </div>
+                        </div>
+                        <div class="item">
+                            <i class="file outline icon"></i>
+                            <div class="content">
+                                b.txt
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions" id="infoButton">
+                <div class="two fluid ui inverted buttons">
+                    <div class="ui green basic inverted button">
+                        OK
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
@@ -90,7 +125,8 @@
                     gib: $("#display-gib").html(),
                 }, 'json')
                 .done(function(data){
-                    $('.modal').modal('hide');
+                    $('#startModal').modal('hide');
+                    $('#infoModal').modal('show');
                     joinServer(data);
                 })
                 .fail(function(){
@@ -104,9 +140,11 @@
             });
 
             $('select.dropdown').dropdown();
-            $('.modal').modal({closable: false});
-            $('.modal').modal('show');
-
+            $('#startModal').modal({closable: false});
+            $('#startModal').modal('show');
+            $("#infoButton").click(function(){
+                $('#infoModal').modal('hide');
+            });
             setupNumeric("#lag", 240);
             setupRange("#range-send", "#display-send");
             setupRange("#range-gib", "#display-gib");
