@@ -176,7 +176,7 @@ function startServerSocket(id, params, cb){
     }
 }
 
-app.get('/', function(req, res){
+app.get('/start', function(req, res){
     res.sendFile(__dirname + '/server.html');
 });
 app.get('/client/:id', function(req, res){
@@ -208,6 +208,6 @@ app.post('/client/create', function(req, res){
     }
 });
 
-http.listen(8000, function(){
-    console.log('listening on *:8000');
+http.listen(9090, function(){
+    console.log('listening on *:9090');
 });
