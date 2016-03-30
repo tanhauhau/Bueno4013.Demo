@@ -107,7 +107,7 @@
         $(function(){
             var windowCount = 0;
             function joinServer(id){
-                var socket = io('server/' + id);
+                var socket = io('/server/' + id);
                 socket.on("server", function(data){
                     $("#server").append(data.replace(/\r\n/g, '<br/>'));
                     $('#server').scrollTop($('#server')[0].scrollHeight);
