@@ -113,12 +113,12 @@
                     $('#server').scrollTop($('#server')[0].scrollHeight);
                 });
                 $("#add-client").click(function(){
-                    window.open('/client/' + id, 'Client' + (windowCount++), 'Client' + (windowCount++));
+                    window.open('client/' + id, 'Client' + (windowCount++), 'Client' + (windowCount++));
                 });
             }
             $('#submit').click(function(event){
                 $(".form").addClass("loading");
-                $.post('/server/create', {
+                $.post('server/create', {
                     iv: $("select[name='iv']").val(),
                     lag: $("#lag").val(),
                     send: $("#display-send").html(),
