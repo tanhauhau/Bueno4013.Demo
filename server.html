@@ -2,6 +2,9 @@
 <html>
     <head>
         <title>Distributed Systems Project - Server</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.css"/>
+        <link rel="stylesheet" href="/static/range.css" />
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { width:100%; height:100%;}
@@ -10,8 +13,7 @@
         #add-client{ position: absolute; width: 75px; right: 0px; height: 50px; color: white; background-color: #444; top: 30px; padding: 16px 24px 16px 12px; cursor: pointer; transition: width .8s ease; }
         #add-client:hover{ width: 100px; }
         </style>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.css"/>
+
     </head>
     <body>
         <div class="term" id="server"></div>
@@ -19,6 +21,9 @@
             Client
         </div>
         <div class="ui modal">
+            <div class="header">
+                Start Server
+            </div>
             <div class="content">
                 <div class="ui form">
                     <div class="field">
@@ -28,6 +33,24 @@
                             <option value="AT-LEAST-ONCE">At Least Once</option>
                         </select>
                     </div>
+                    <div class="field">
+                        <label>Lag while sending and receiving (second) [max 240]</label>
+                        <div class="ui right labeled input">
+                            <input id="lag" name="lag" type="text" placeholder="0">
+                            <div class="ui basic label">
+                                second
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Packet loss while sending probability: <span id="display-send">0</span>%</label>
+                        <div class="ui range" id="range-send"></div>
+                    </div>
+                    <div class="field">
+                        <label>Sending malformed packet probability: <span id="display-gib">0</span>%</label>
+                        <div class="ui range" id="range-gib"></div>
+                    </div>
+
                     <button class="ui button" type="submit" id="submit">Start Server</button>
                     <div id="server-error" class="ui warning message">
                         <div class="header">
@@ -40,8 +63,11 @@
     </body>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.alphanum/1.0.24/jquery.alphanum.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.js"></script>
+    <script src="/static/range.js" ></script>
+    <script src="/static/common.js" ></script>
     <script>
         $(function(){
             var windowCount = 0;
@@ -57,7 +83,12 @@
             }
             $('#submit').click(function(event){
                 $(".form").addClass("loading");
-                $.post('/server/create', {iv: $("select[name='iv']").val()}, 'json')
+                $.post('/server/create', {
+                    iv: $("select[name='iv']").val(),
+                    lag: $("#lag").val(),
+                    send: $("#display-send").html(),
+                    gib: $("#display-gib").html(),
+                }, 'json')
                 .done(function(data){
                     $('.modal').modal('hide');
                     joinServer(data);
@@ -75,6 +106,10 @@
             $('select.dropdown').dropdown();
             $('.modal').modal({closable: false});
             $('.modal').modal('show');
+
+            setupNumeric("#lag", 240);
+            setupRange("#range-send", "#display-send");
+            setupRange("#range-gib", "#display-gib");
         });
     </script>
 </html>

@@ -2,6 +2,10 @@
 <html>
     <head>
         <title>Distributed Systems Project</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/checkbox.min.css"/>
+        <link rel="stylesheet" href="/static/range.css" />
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { width:100%; height:100%;}
@@ -15,15 +19,108 @@
     <body>
         <div class="term" id="client"></div>
         <form>
-            <input id="m" type="text" autocomplete="off"/>
+            <input id="m" type="text" data-content="Invalid character" autocomplete="off" disabled="disabled"/>
         </form>
+        <div class="ui modal">
+            <div class="header">
+                Start Client
+            </div>
+            <div class="content">
+                <div class="ui form">
+                    <div class="field">
+                        <label>Socket timeout(second) [max 240s]</label>
+                        <div class="ui right labeled input">
+                            <input id="timeout" name="timeout" type="text" placeholder="0">
+                            <div class="ui basic label">
+                                second
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Cache freshness(second) [max 60s]</label>
+                        <div class="ui right labeled input">
+                            <input id="cf" name="cf" type="text" placeholder="0">
+                            <div class="ui basic label">
+                                second
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Lag while sending and receiving (second) [max 240]</label>
+                        <div class="ui right labeled input">
+                            <input id="lag" name="lag" type="text" placeholder="0">
+                            <div class="ui basic label">
+                                second
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Packet loss while sending probability: <span id="display-send">0</span>%</label>
+                        <div class="ui range" id="range-send"></div>
+                    </div>
+                    <div class="field">
+                        <label>Packet loss while receiving probability: <span id="display-recv">0</span>%</label>
+                        <div class="ui range" id="range-recv"></div>
+                    </div>
+                    <div class="field">
+                        <label>Sending malformed packet probability: <span id="display-gib">0</span>%</label>
+                        <div class="ui range" id="range-gib"></div>
+                    </div>
+
+                    <div class="field">
+                        <label>Show debug info</label>
+                        <div class="ui slider checkbox" id="info">
+                          <input type="checkbox" name="info">
+                          <label>Show</label>
+                        </div>
+                    </div>
+
+                    <button class="ui button" type="submit" id="submit">Start Client</button>
+                    <div id="server-error" class="ui warning message">
+                        <div class="header">
+                            Socket error!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.alphanum/1.0.24/jquery.alphanum.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/form.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/checkbox.min.js"></script>
+    <script src="/static/range.js" ></script>
+    <script src="/static/common.js" ></script>
     <script>
         $(function(){
-            function startClientSocket(id){
+            var id = '';
+            var location = window.location.pathname;
+            var regex = /client\/(\S+)/;
+            if(regex.test(location)){
+                id = regex.exec(location)[1];
+            }else{
+                window.open('','_self').close();
+            }
+
+            function initTerminal(){
+                //enable the input
+                $("#m").removeAttr('disabled');
+                //set up
+                $("#m").blur(function() {
+                    setTimeout(function() { $("#m").focus(); }, 0);
+                });
+                $("#m").alphanum({
+                    allow: ',.'
+                });
+            }
+
+            function startClientSocket(id, cid){
                 var socket = io('/client/' + id);
+                socket.on("joinid", function(){
+                    socket.emit("joinid", cid);
+                });
                 socket.on("client", function(data){
                     $("#client").append(data.replace(/\n/g, '<br/>'));
                     $('#client').scrollTop($('#client')[0].scrollHeight);
@@ -36,19 +133,45 @@
                     $('#m').val('');
                     return false;
                 });
+                initTerminal();
             }
 
-            var location = window.location.pathname;
-            var regex = /client\/(\S+)/;
-            if(regex.test(location)){
-                var id = regex.exec(location)[1];
-                startClientSocket(id);
-
-                $("#m").focus();
-            }
-            $("#m").blur(function() {
-                setTimeout(function() { $("#m").focus(); }, 0);
+            $('#submit').click(function(event){
+                $(".form").addClass("loading");
+                $.post('/client/create', {
+                    id: id,
+                    timeout: $('#timeout').val(),
+                    cf: $('#cf').val(),
+                    lag: $('#lag').val(),
+                    send: $("#display-send").html(),
+                    recv: $("#display-recv").html(),
+                    gib: $("#display-gib").html(),
+                    info: $("#info").checkbox("is checked"),
+                }, 'json')
+                .done(function(data){
+                    $('.modal').modal('hide');
+                    startClientSocket(id, data);
+                    $("#m").focus();
+                })
+                .fail(function(){
+                    $("#server-error").show();
+                    console.log("failed");
+                })
+                .always(function(){
+                    $(".form").removeClass("loading");
+                });
+                return false;
             });
+
+            $('.modal').modal({closable: false});
+            $('.modal').modal('show');
+
+            setupNumeric("#timeout", 240)
+            setupNumeric("#cf", 60)
+            setupNumeric("#lag", 240)
+            setupRange("#range-send", "#display-send");
+            setupRange("#range-recv", "#display-recv");
+            setupRange("#range-gib", "#display-gib");
         });
     </script>
 </html>
