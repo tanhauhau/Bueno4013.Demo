@@ -12,6 +12,18 @@ This web application is written as a [project](https://github.com/tanhauhau/Buen
 
 `node server.js` 
 
+## Folder Structure
+Directory structure and contents
+
+Directory | Content
+----------| -------
+`demo-distributed-server.js` | Express server
+`client.html` | Client demo page
+`server.html` | Server demo page
+`static/` | Static JavaScript and CSS files
+`java/` | Contains the `.jar` file for the demo
+`data/` | Contains the default data for the demo
+
 ## Dependencies
 
 ### Backend node modules
