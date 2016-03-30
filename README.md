@@ -1,6 +1,8 @@
 # Web application for Distributed Systems Project demo
 
-This web application is written as a project demo for [my website](http://lihautan.me).
+This web application is written as a [project](https://github.com/tanhauhau/Bueno4013/tree/master) demo.
+
+[Demo](http://lihautan.me/demo/distributed)
 
 ## Installation
 
@@ -9,8 +11,6 @@ This web application is written as a project demo for [my website](http://lihaut
 ## Get Started
 
 `node server.js` 
-
-
 
 ## Dependencies
 
@@ -27,4 +27,6 @@ This web application is written as a project demo for [my website](http://lihaut
 
 ### Frontend modules
 * `jquery`
-* 
+* `Semantic UI`
+* `jquery.alphanumeric`
+* `semantic-ui-range`
