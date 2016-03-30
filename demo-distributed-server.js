@@ -53,6 +53,7 @@ function startClientSocket(id){
         var started = false;
         var roomid = '';
         var folder, clientTerm;
+        var ninetynine = false;
         socket.on("joinid", function(data){
             if(!sessions[id]){
                 socket.emit('leave', 'leave');
@@ -80,8 +81,7 @@ function startClientSocket(id){
             clientTerm.write(command);
             //terminal -> socket
             var exitTest = /[\$\#]/;
-            var nineTest = /99/;
-            var ninetynine = false;
+            var nineTest = /99\. Exit/;
             clientTerm.on('data', function(data){
                 if(exitTest.test(data)){
                     if (ninetynine) {
@@ -89,15 +89,11 @@ function startClientSocket(id){
                     }
                 }else{
                     socket.emit('client', data);
-                    if (nineTest.test(data)) {
-                        ninetynine = true;
-                    }else{
-                        ninetynine = false;
-                    }
                 }
             });
             started = true;
         });
+        var nineTest = /99/;
         //socket -> terminal
         socket.on('input', function(data){
             if (!started) return;
@@ -112,6 +108,11 @@ function startClientSocket(id){
             }
             data = outchar.join("");
             clientTerm.write(data + "\n");
+	    if(nineTest.test(data)){
+		ninetynine = true;
+	    }else{
+		ninetynine = false;
+	    }
         });
         //destroy
         socket.on("disconnect", function(){
